@@ -3,14 +3,101 @@
 ---
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>nexxel • scripts</title>
+    <style is:global>
+      @font-face {
+        font-family: "AtariSmall";
+        src: url("/AtariSmall.ttf") format("truetype");
+      }
+      body {
+        font-family: "AtariSmall", "Courier New", monospace;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #000;
+        color: #f0e5cf;
+        overflow: hidden;
+      }
+
+      h1 {
+        position: absolute;
+        white-space: nowrap;
+        font-size: 2.25rem;
+        line-height: 2.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>nexxel • scripts</h1>
+
+    <script is:inline>
+      const heading = document.querySelector("h1");
+
+      const initialState = { x: 0, y: 0, dx: 2, dy: 2 };
+
+      const getRandomColor = () => {
+        return `#${[...Array(3)]
+          .map(() =>
+            Math.floor(Math.random() * 56 + 100)
+              .toString(16)
+              .padStart(2, "0")
+          )
+          .join("")}`;
+      };
+
+      const updatePosition = ({ x, y, dx, dy }) => ({
+        x: x + dx,
+        y: y + dy,
+        dx,
+        dy,
+      });
+
+      const checkBounce = (state) => {
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        const headingWidth = heading?.offsetWidth;
+        const headingHeight = heading?.offsetHeight;
+
+        let { x, y, dx, dy } = state;
+        let bounced = false;
+
+        if (x <= 0 || (headingWidth && x + headingWidth >= screenWidth)) {
+          dx = -dx;
+          bounced = true;
+        }
+        if (y <= 0 || (headingHeight && y + headingHeight >= screenHeight)) {
+          dy = -dy;
+          bounced = true;
+        }
+
+        return { ...state, dx, dy, bounced };
+      };
+
+      const applyStyles = ({ x, y, bounced }) => {
+        if (bounced) {
+          heading.style.color = getRandomColor();
+        }
+
+        if (heading) {
+          heading.style.left = `${x}px`;
+          heading.style.top = `${y}px`;
+        }
+      };
+
+      const moveHeading = (state) => {
+        const newState = checkBounce(updatePosition(state));
+        applyStyles(newState);
+
+        requestAnimationFrame(() => moveHeading(newState));
+      };
+
+      moveHeading(initialState);
+    </script>
+  </body>
 </html>
